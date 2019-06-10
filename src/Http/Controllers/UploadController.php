@@ -29,9 +29,14 @@ class UploadController extends BaseController
     /**
      * UploadController constructor.
      * @param Request $request
+     * @throws \Exception
      */
     public function __construct(Request $request)
     {
+        if (!$this->hasHandlers()) {
+            throw new \Exception('No upload handlers defined.');
+        }
+
         $handlerName = $request->get('handler', false);
         if (empty($handlerName)) {
             return;
@@ -41,6 +46,16 @@ class UploadController extends BaseController
         if ($middleware = $this->handler->middleware()) {
             $this->middleware($middleware);
         }
+    }
+
+    /**
+     * Check if handlers are defined
+     *
+     * @return bool
+     */
+    protected function hasHandlers(): bool
+    {
+        return !empty(config('resumablejs.handlers', false));
     }
 
     /**

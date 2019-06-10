@@ -25,6 +25,11 @@ class ResumableJsProvider extends ServiceProvider
 
     public function boot(){
 
+        /* Publish the config */
+        $this->publishes([
+            __DIR__.'/../config/resumablejs.php' => config_path('resumablejs.php'),
+        ]);
+
         /* Register Routes */
         $this->loadRoutesFrom(__DIR__.'/../routes/upload.php');
 
