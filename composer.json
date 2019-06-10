@@ -19,5 +19,9 @@
         "le0daniel\\Laravel\\ResumableJs\\Providers\\ResumableJsProvider"
       ]
     }
+  },
+  "require": {
+    "php": "^7.2",
+    "symfony/process":"~3.0||~4.0"
   }
 }
