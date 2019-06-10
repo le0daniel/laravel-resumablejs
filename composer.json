@@ -1,6 +1,6 @@
 {
   "name": "le0daniel/laravel-resumablejs",
-  "description": "Very flexible integration of resumable.js",
+  "description": "Very flexible integration of chunk and async uploading",
   "license": "MIT",
   "authors": [
     {
@@ -17,10 +17,7 @@
     "laravel": {
       "providers": [
         "le0daniel\\Laravel\\ResumableJs\\Providers\\ResumableJsProvider"
-      ],
-      "aliases": {
-        "Debugbar": "Barryvdh\\Debugbar\\Facade"
-      }
+      ]
     }
   }
 }
