@@ -31,7 +31,7 @@ return [
      * given on the upload request.
      */
     'handlers' => [
-        'basic' => \le0daniel\Laravel\ResumableJs\Handlers\BasicHandler::class,
+        //'basic' => \le0daniel\Laravel\ResumableJs\Handlers\BasicHandler::class,
     ],
 
 
