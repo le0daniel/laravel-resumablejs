@@ -8,10 +8,10 @@
 
 namespace le0daniel\Laravel\ResumableJs\Upload;
 
-
+use le0daniel\Laravel\ResumableJs\Contracts\FileCombiner;
 use Symfony\Component\Process\Process;
 
-class CatFileCombiner implements FileCombinerContract
+class CatFileCombiner implements FileCombiner
 {
 
     /**

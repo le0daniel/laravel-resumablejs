@@ -14,6 +14,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Log;
 use le0daniel\Laravel\ResumableJs\Contracts\UploadHandler;
 use le0daniel\Laravel\ResumableJs\Models\FileUpload;
 use le0daniel\Laravel\ResumableJs\Upload\CatFileCombiner;
@@ -134,6 +135,7 @@ class CompleteAndProcessUpload implements ShouldQueue
             // Let the handler do it's job
             $result = $handler->process($this->completeFile, $this->fileUpload);
         } catch (\Exception $e) {
+            Log::error($e->getMessage(),$e->getTrace());
             if (isset($this->completeFile) && file_exists($this->completeFile->getRealPath())) {
                 unlink($this->completeFile->getRealPath());
             }

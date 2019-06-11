@@ -38,12 +38,12 @@ class UploadController extends BaseController
             throw new \Exception('No upload handlers defined.');
         }
 
-        $handlerName = $request->get('handler', false);
-        if (empty($handlerName)) {
+        if ($request->route()->uri !== 'upload/init') {
             return;
         }
 
-        $this->handler = $this->getHandler($handlerName);
+        // Add the handler middleware
+        $this->handler = $this->getHandler($request->get('handler', ''));
         if ($middleware = $this->handler->middleware()) {
             $this->middleware($middleware);
         }
@@ -60,6 +60,8 @@ class UploadController extends BaseController
     }
 
     /**
+     * Get the handler by name
+     *
      * @param string $handlerName
      * @return UploadHandler
      */
@@ -68,7 +70,7 @@ class UploadController extends BaseController
         $handlers = config('resumablejs.handlers');
 
         if (!array_key_exists($handlerName, $handlers)) {
-            abort(403);
+            abort(404,'Handler not found.');
         }
 
         return App::make($handlers[$handlerName]);
@@ -89,7 +91,8 @@ class UploadController extends BaseController
      * @param string $token
      * @return FileUpload
      */
-    protected function getFileUploadOrFail(string $token): FileUpload{
+    protected function getFileUploadOrFail(string $token): FileUpload
+    {
         return FileUpload::where('token', '=', $token)
             ->where('is_complete', '=', 0)
             ->firstOrFail();
@@ -98,10 +101,11 @@ class UploadController extends BaseController
     /**
      * Makes sure a handler was found and it s middlewares enforced
      */
-    protected function hasHandlerOrFail(){
+    protected function hasHandlerOrFail()
+    {
         // Make sure a handler is set
         if (!isset($this->handler)) {
-            abort(403);
+            abort(404,'Handler not found');
         }
     }
 
