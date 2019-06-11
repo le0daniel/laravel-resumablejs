@@ -8,6 +8,7 @@
 
 namespace le0daniel\Laravel\ResumableJs\Http\Controllers;
 
+use Faker\Provider\File;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as BaseController;
@@ -83,6 +84,28 @@ class UploadController extends BaseController
     }
 
     /**
+     * Get the uncomplete file upload
+     *
+     * @param string $token
+     * @return FileUpload
+     */
+    protected function getFileUploadOrFail(string $token): FileUpload{
+        return FileUpload::where('token', '=', $token)
+            ->where('is_complete', '=', 0)
+            ->firstOrFail();
+    }
+
+    /**
+     * Makes sure a handler was found and it s middlewares enforced
+     */
+    protected function hasHandlerOrFail(){
+        // Make sure a handler is set
+        if (!isset($this->handler)) {
+            abort(403);
+        }
+    }
+
+    /**
      * @param Request $request
      * @return array
      * @throws \Illuminate\Validation\ValidationException
@@ -90,10 +113,7 @@ class UploadController extends BaseController
      */
     public function init(Request $request)
     {
-        // Make sure a handler is set
-        if (!isset($this->handler)) {
-            abort(403);
-        }
+        $this->hasHandlerOrFail();
 
         // Validate the request
         $this->validate($request, [
@@ -106,6 +126,7 @@ class UploadController extends BaseController
         // Extract all data
         $name = basename((string)$request->get('name'));
         $size = intval($request->get('size'));
+        $payload = $request->get('payload', []);
         $fileUpload = new FileUpload([
             'name' => $name,
             'size' => $size,
@@ -115,21 +136,13 @@ class UploadController extends BaseController
         ]);
 
         try {
-            $this->handler->validateOrFail(
-                $fileUpload,
-                $request->get('payload', []),
-                $request
-            );
+            $this->handler->validateOrFail($fileUpload, $payload, $request);
         } catch (\Exception $e) {
             abort(422, 'Invalid File');
         }
 
         // Add the payload
-        $fileUpload->payload = $this->handler->payload(
-            $fileUpload,
-            $request->get('payload', []),
-            $request
-        );
+        $fileUpload->payload = $this->handler->payload($fileUpload, $payload, $request);
         $fileUpload->token = $this->generateUniqueToken();
         $fileUpload->handler = get_class($this->handler);
         $fileUpload->saveOrFail();
@@ -152,11 +165,11 @@ class UploadController extends BaseController
             'resumableChunkNumber' => 'required|integer|min:1'
         ]);
 
-        $fileUpload = FileUpload::where('token', '=', $request->get('token'))
-            ->where('is_complete', '=', 0)
-            ->firstOrFail();
+        $complete = $manager->hasCompletedChunk(
+            $this->getFileUploadOrFail($request->get('token')),
+            $request->get('resumableChunkNumber')
+        );
 
-        $complete = $manager->hasCompletedChunk($fileUpload, $request->get('resumableChunkNumber'));
         return response('', $complete ? 200 : 204);
     }
 
@@ -174,13 +187,9 @@ class UploadController extends BaseController
             'file' => 'required|file|max:' . config('resumablejs.chunk_size')
         ]);
 
-        $fileUpload = FileUpload::where('token', '=', $request->get('token'))
-            ->where('is_complete', '=', 0)
-            ->firstOrFail();
-
         // Upload a chunk
         $manager->handleChunk(
-            $fileUpload,
+            $this->getFileUploadOrFail($request->get('token')),
             $request->get('resumableChunkNumber'),
             $request->file('file')
         );
@@ -201,12 +210,10 @@ class UploadController extends BaseController
             'token' => 'required|string|size:64',
         ]);
 
-        $fileUpload = FileUpload::where('token', '=', $request->get('token'))
-            ->where('is_complete', '=', 0)
-            ->firstOrFail();
-
         /* Complete the upload */
-        return $manager->process($fileUpload);
+        return $manager->process(
+            $this->getFileUploadOrFail($request->get('token'))
+        );
     }
 
 }
