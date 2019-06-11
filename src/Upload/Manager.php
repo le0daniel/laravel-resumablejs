@@ -31,6 +31,7 @@ class Manager
 
     /**
      * Manager constructor.
+     * @throws \Exception
      */
     public function __construct()
     {
@@ -172,32 +173,43 @@ class Manager
             ];
         }
 
-        /* Process Async */
-        if ($async) {
-            dispatch(new CompleteAndProcessUpload(
-                $fileUpload,
-                $this->getChunkDirectory($fileUpload->token, true)
-            ))->onQueue(
-                config('resumablejs.queue', 'default')
-            );
-
-            // Return the result
-            return [
-                'success' => true,
-                'async' => true,
-            ];
-        }
-
         /* Process Sync */
         $processerJob = new CompleteAndProcessUpload(
             $fileUpload,
             $this->getChunkDirectory($fileUpload->token, true)
         );
 
+        /* Process Async */
+        if ($async) {
+            return $this->dispatchAndReturn($processerJob);
+        }
+
+        $result = $processerJob->handle(true);
+
+        return [
+            'success' => is_array($result),
+            'async' => false,
+            'data' => $result
+        ];
+    }
+
+    /**
+     * Dispatch the job and return the correct response
+     *
+     * @param CompleteAndProcessUpload $job
+     * @return array
+     */
+    protected function dispatchAndReturn(CompleteAndProcessUpload $job): array
+    {
+        dispatch($job)
+            ->onQueue(
+                config('resumablejs.queue', 'default')
+            );
+
+        // Return the result
         return [
             'success' => true,
-            'async' => false,
-            'data' => $processerJob->handle(true)
+            'async' => true,
         ];
     }
 

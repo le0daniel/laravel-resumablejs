@@ -9,7 +9,6 @@
 namespace le0daniel\Laravel\ResumableJs\Jobs;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Pipeline\Pipeline;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -18,8 +17,7 @@ use Illuminate\Support\Facades\App;
 use le0daniel\Laravel\ResumableJs\Contracts\UploadHandler;
 use le0daniel\Laravel\ResumableJs\Models\FileUpload;
 use le0daniel\Laravel\ResumableJs\Upload\CatFileCombiner;
-use le0daniel\Laravel\ResumableJs\Upload\FileCombinerContract;
-use Symfony\Component\Process\Process;
+use le0daniel\Laravel\ResumableJs\Contracts\FileCombiner;
 
 class CompleteAndProcessUpload implements ShouldQueue
 {
@@ -32,6 +30,11 @@ class CompleteAndProcessUpload implements ShouldQueue
     protected $directory;
 
     /**
+     * @var \SplFileInfo
+     */
+    protected $completeFile;
+
+    /**
      * CompleteAndProcessUpload constructor.
      * @param FileUpload $fileUpload
      */
@@ -42,9 +45,9 @@ class CompleteAndProcessUpload implements ShouldQueue
     }
 
     /**
-     * @return FileCombinerContract
+     * @return FileCombiner
      */
-    protected function getFileCombiner(): FileCombinerContract
+    protected function getFileCombiner(): FileCombiner
     {
         return App::make(CatFileCombiner::class);
     }
@@ -80,38 +83,65 @@ class CompleteAndProcessUpload implements ShouldQueue
     }
 
     /**
-     * Handle the uploaded file
+     * Make sure the filesize is the same as in the init call
      *
-     * @param bool $withReturn
-     * @return array|null
      * @throws \Exception
      */
-    public function handle(bool $withReturn = false)
+    protected function validateFileSizeOrFail()
     {
-        $uploadedFile = $this->combineFiles();
-
-        /** @var UploadHandler $handler */
-        $handler = App::make($this->fileUpload->handler);
-
-        if ($uploadedFile->getSize() !== $this->fileUpload->size) {
-            unlink($uploadedFile->getRealPath());
-            return null;
+        if ($this->completeFile->getSize() !== $this->fileUpload->size) {
+            throw new \Exception('Invalid file size');
         }
+    }
 
+    /**
+     * Check if it is the same mime type as described by the initcall
+     *
+     * @throws \Exception
+     */
+    protected function validateMimeTypeOrFail()
+    {
         // Get the file mimetype
         $finfo = new \finfo(FILEINFO_MIME);
-        $resource = fopen($uploadedFile->getRealPath(), 'r+');
+        $resource = fopen($this->completeFile->getRealPath(), 'r+');
         $mimetype = $finfo->buffer(fread($resource, 1024), FILEINFO_MIME_TYPE);
         fclose($resource);
 
         // Verify mime type
         if ($mimetype !== $this->fileUpload->type) {
-            unlink($uploadedFile);
-            return null;
+            throw new \Exception('Invalid mime type');
+        }
+    }
+
+    /**
+     * Handle the uploaded file
+     *
+     * @param bool $withReturn
+     * @return array|boolean|null
+     * @throws \Exception
+     */
+    public function handle(bool $withReturn = false)
+    {
+        try {
+            $this->completeFile = $this->combineFiles();
+
+            $this->validateFileSizeOrFail();
+            $this->validateMimeTypeOrFail();
+
+            /** @var UploadHandler $handler */
+            $handler = App::make($this->fileUpload->handler);
+
+            // Let the handler do it's job
+            $result = $handler->process($this->completeFile, $this->fileUpload);
+        } catch (\Exception $e) {
+            if (isset($this->completeFile) && file_exists($this->completeFile->getRealPath())) {
+                unlink($this->completeFile->getRealPath());
+            }
+            return false;
         }
 
-        // Let the handler do it's job
-        $result = $handler->process($uploadedFile, $this->fileUpload);
+        // Delete the uploaded file
+        unlink($this->completeFile->getRealPath());
 
         if ($withReturn) {
             return $result;

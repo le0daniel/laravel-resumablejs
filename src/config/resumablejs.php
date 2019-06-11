@@ -2,34 +2,56 @@
 
 return [
 
-    /**
-     * Enable async processing, will queue to large files or
-     * if the handler says so
-     */
+    /*
+    |--------------------------------------------------------------------------
+    | Async and Queue
+    |--------------------------------------------------------------------------
+    |
+    | As large files require longer to process, its a good idea to process them
+    | in the background
+    |
+    | If set to true, you have the option to force process a file in the
+    | background depending on your handler and files larger than 100Mb are
+    | always processed in the background.
+    |
+    */
     'async' => true,
     'queue' => 'default',
 
-    /**
-     * The size of the chunks.
-     * Only the last chunk is allowed to be smaller.
-     */
+    /*
+    |--------------------------------------------------------------------------
+    | Upload Chunk size
+    |--------------------------------------------------------------------------
+    |
+    | This is the size of each chunk in Bytes. All chunks must have exactly
+    | this size except the last one (which usually is less).
+    |
+    */
     'chunk_size' => 10 * 1024 * 1024,
 
-    /**
-     * Where to store the chunks
-     */
+    /*
+    |--------------------------------------------------------------------------
+    | Storage
+    |--------------------------------------------------------------------------
+    |
+    | Specify the disk and folder to use.
+    | It's important, that is must be a local drive.
+    |
+    */
     'storage' => [
         'disk' => 'local',
         'folder' => 'chunks',
     ],
 
-    /**
-     * Upload Handlers
-     * ----------------------------------------------------------------------
-     * Each handler must implement the UploadHandler Interface.
-     * The name of the handler, which is used to process the file must be
-     * given on the upload request.
-     */
+    /*
+    |--------------------------------------------------------------------------
+    | Handlers
+    |--------------------------------------------------------------------------
+    |
+    | Specify a list of handlers. Handlers must extend the HandlerContract
+    | (le0daniel\Laravel\ResumableJs\Contracts\UploadHandler)
+    |
+    */
     'handlers' => [
         //'basic' => \le0daniel\Laravel\ResumableJs\Handlers\BasicHandler::class,
     ],
