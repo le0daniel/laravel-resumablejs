@@ -19,6 +19,7 @@ use le0daniel\Laravel\ResumableJs\Contracts\UploadHandler;
 use le0daniel\Laravel\ResumableJs\Models\FileUpload;
 use le0daniel\Laravel\ResumableJs\Upload\CatFileCombiner;
 use le0daniel\Laravel\ResumableJs\Contracts\FileCombiner;
+use le0daniel\Laravel\ResumableJs\Upload\UploadedFile;
 
 class CompleteAndProcessUpload implements ShouldQueue
 {
@@ -31,7 +32,7 @@ class CompleteAndProcessUpload implements ShouldQueue
     protected $directory;
 
     /**
-     * @var \SplFileInfo
+     * @var UploadedFile
      */
     protected $completeFile;
 
@@ -59,7 +60,7 @@ class CompleteAndProcessUpload implements ShouldQueue
      * @return \SplFileInfo
      * @throws \Exception
      */
-    protected function combineFiles(): \SplFileInfo
+    protected function combineFiles(): UploadedFile
     {
         $outputFileName = $this->directory . '/completed-upload';
         $chunks = [];
@@ -80,7 +81,7 @@ class CompleteAndProcessUpload implements ShouldQueue
             throw new \Exception('Failed to combine the chunks into one file. Combiner: ' . get_class($this->getFileCombiner()));
         }
 
-        return new \SplFileInfo($outputFileName);
+        return new UploadedFile($outputFileName);
     }
 
     /**
@@ -102,14 +103,7 @@ class CompleteAndProcessUpload implements ShouldQueue
      */
     protected function validateMimeTypeOrFail()
     {
-        // Get the file mimetype
-        $finfo = new \finfo(FILEINFO_MIME);
-        $resource = fopen($this->completeFile->getRealPath(), 'r+');
-        $mimetype = $finfo->buffer(fread($resource, 1024), FILEINFO_MIME_TYPE);
-        fclose($resource);
-
-        // Verify mime type
-        if ($mimetype !== $this->fileUpload->type) {
+        if ($this->completeFile->getMimeType() !== $this->fileUpload->type) {
             throw new \Exception('Invalid mime type');
         }
     }
