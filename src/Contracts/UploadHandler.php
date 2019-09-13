@@ -60,8 +60,9 @@ interface UploadHandler
      * Broadcast the event on the correct channel when uploading async
      *
      * @param FileUpload $fileUpload
+     * @param string $broadcastKey
      * @param array $processedData
      * @return void
      */
-    public function broadcast(FileUpload $fileUpload, array $processedData);
+    public function broadcast(FileUpload $fileUpload, string $broadcastKey, array $processedData);
 }

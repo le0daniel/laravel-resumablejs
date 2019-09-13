@@ -14,6 +14,7 @@ use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\App;
+use Illuminate\Support\Str;
 use le0daniel\Laravel\ResumableJs\Contracts\UploadHandler;
 use le0daniel\Laravel\ResumableJs\Jobs\CompleteAndProcessUpload;
 use le0daniel\Laravel\ResumableJs\Models\FileUpload;
@@ -210,6 +211,7 @@ class Manager
         return [
             'success' => true,
             'async' => true,
+            'broadcastKey' => $job->getBroadcastKey(),
         ];
     }
 
