@@ -63,7 +63,8 @@ class CompleteAndProcessUpload implements ShouldQueue
     /**
      * @return string
      */
-    public function getBroadcastKey(): string {
+    public function getBroadcastKey(): string
+    {
         return $this->broadcastKey;
     }
 
@@ -110,15 +111,18 @@ class CompleteAndProcessUpload implements ShouldQueue
     }
 
     /**
-     * Check if it is the same mime type as described by the initcall
-     *
+     * @param array|null $allowedMimeTypes
      * @throws \Exception
      */
-    protected function validateMimeTypeOrFail()
+    protected function validateMimeTypeOrFail(?array $allowedMimeTypes = null)
     {
-        $process = new Process("file -b --mime-type ". escapeshellarg($this->completeFile->getRealPath()));
+        $process = new Process("file -b --mime-type " . escapeshellarg($this->completeFile->getRealPath()));
         $process->mustRun();
         $mimeType = trim($process->getOutput());
+
+        if (in_array($mimeType, $allowedMimeTypes, true)) {
+            return;
+        }
 
         if ($mimeType !== $this->fileUpload->type) {
             throw new \Exception("Invalid mime type. Got {$this->completeFile->getMimeType()} expected {$this->fileUpload->type}");
@@ -138,10 +142,16 @@ class CompleteAndProcessUpload implements ShouldQueue
             $this->completeFile = $this->combineFiles();
 
             $this->validateFileSizeOrFail();
-            $this->validateMimeTypeOrFail();
 
             /** @var UploadHandler $handler */
             $handler = App::make($this->fileUpload->handler);
+
+            if (method_exists($handler, 'allowedMimeTypes')) {
+                $this->validateMimeTypeOrFail($handler->allowedMimeTypes());
+            } else {
+                $this->validateMimeTypeOrFail();
+            }
+
 
             // Let the handler do it's job
             $result = $handler->process($this->completeFile, $this->fileUpload);
