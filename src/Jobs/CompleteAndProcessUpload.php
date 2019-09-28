@@ -120,7 +120,7 @@ class CompleteAndProcessUpload implements ShouldQueue
         $process->mustRun();
         $mimeType = trim($process->getOutput());
 
-        if (in_array($mimeType, $allowedMimeTypes, true)) {
+        if (in_array($mimeType, $allowedMimeTypes ?? [], true)) {
             return;
         }
 
