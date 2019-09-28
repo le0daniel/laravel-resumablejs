@@ -21,6 +21,7 @@ use le0daniel\Laravel\ResumableJs\Models\FileUpload;
 use le0daniel\Laravel\ResumableJs\Upload\CatFileCombiner;
 use le0daniel\Laravel\ResumableJs\Contracts\FileCombiner;
 use le0daniel\Laravel\ResumableJs\Upload\UploadedFile;
+use Symfony\Component\Process\Process;
 
 class CompleteAndProcessUpload implements ShouldQueue
 {
@@ -115,8 +116,12 @@ class CompleteAndProcessUpload implements ShouldQueue
      */
     protected function validateMimeTypeOrFail()
     {
-        if ($this->completeFile->getMimeType() !== $this->fileUpload->type) {
-            throw new \Exception('Invalid mime type');
+        $process = new Process("file -b --mime-type ". escapeshellarg($this->completeFile->getRealPath()));
+        $process->mustRun();
+        $mimeType = trim($process->getOutput());
+
+        if ($mimeType !== $this->fileUpload->type) {
+            throw new \Exception("Invalid mime type. Got {$this->completeFile->getMimeType()} expected {$this->fileUpload->type}");
         }
     }
 
