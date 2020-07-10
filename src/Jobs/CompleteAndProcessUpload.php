@@ -95,7 +95,9 @@ class CompleteAndProcessUpload implements ShouldQueue
                 unlink($file);
             }
         } else {
-            throw new \Exception('Failed to combine the chunks into one file. Combiner: ' . get_class($this->getFileCombiner()));
+            throw new \Exception(
+                'Failed to combine the chunks into one file. Combiner: ' . get_class($this->getFileCombiner())
+            );
         }
 
         return new UploadedFile($outputFileName);
@@ -117,8 +119,12 @@ class CompleteAndProcessUpload implements ShouldQueue
      * @param array|null $allowedMimeTypes
      * @throws \Exception
      */
-    protected function validateMimeTypeOrFail(?array $allowedMimeTypes = null)
+    protected function validateMimeTypeOrFail(?array $allowedMimeTypes = null): void
     {
+        if (!config('resumablejs.validate_mime_type', true)) {
+            return;
+        }
+
         $process = new Process(["file", "-b", '--mime-type', $this->completeFile->getRealPath()]);
         $process->mustRun();
         $mimeType = trim($process->getOutput());
@@ -128,7 +134,9 @@ class CompleteAndProcessUpload implements ShouldQueue
         }
 
         if ($mimeType !== $this->fileUpload->type) {
-            throw new \Exception("Invalid mime type. Got {$this->completeFile->getMimeType()} expected {$this->fileUpload->type}");
+            throw new \Exception(
+                "Invalid mime type. Got {$this->completeFile->getMimeType()} expected {$this->fileUpload->type}"
+            );
         }
     }
 
@@ -149,12 +157,11 @@ class CompleteAndProcessUpload implements ShouldQueue
             /** @var UploadHandler $handler */
             $handler = App::make($this->fileUpload->handler);
 
-            if (method_exists($handler, 'allowedMimeTypes')) {
-                $this->validateMimeTypeOrFail($handler->allowedMimeTypes());
-            } else {
-                $this->validateMimeTypeOrFail();
-            }
-
+            $this->validateMimeTypeOrFail(
+                method_exists($handler, 'allowedMimeTypes')
+                    ? $handler->allowedMimeTypes()
+                    : null
+            );
 
             // Let the handler do it's job
             $result = $handler->process($this->completeFile, $this->fileUpload);
