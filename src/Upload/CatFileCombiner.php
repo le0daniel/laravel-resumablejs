@@ -24,11 +24,10 @@ class CatFileCombiner implements FileCombiner
     public function combineFiles(array $filesToCombine, string $absoluteOutputPath): bool
     {
         // Merge All files together
-        $command = sprintf(
-            'cat %s > %s',
-            implode(' ', array_map('escapeshellarg', $filesToCombine)),
-            escapeshellarg($absoluteOutputPath)
-        );
+        $command = ['cat'];
+        array_push($command, ...$filesToCombine);
+        $command[] = '>';
+        $command[] = $absoluteOutputPath;
 
         // Set the timeout depending on the mode the app is running
         // Larger files are always processed in the background
