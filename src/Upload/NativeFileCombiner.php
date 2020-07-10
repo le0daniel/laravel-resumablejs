@@ -2,7 +2,9 @@
 
 namespace le0daniel\Laravel\ResumableJs\Upload;
 
-final class NativeFileCombiner
+use le0daniel\Laravel\ResumableJs\Contracts\FileCombiner;
+
+final class NativeFileCombiner implements FileCombiner
 {
     public function combineFiles(array $filesToCombine, string $absoluteOutputPath): bool
     {
