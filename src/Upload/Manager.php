@@ -63,7 +63,7 @@ class Manager
         $path = $this->path . '/' . $token;
 
         if ($absolute) {
-            return $this->disk->getAdapter()->getPathPrefix() . '/' . $path;
+            return rtrim($this->disk->getAdapter()->getPathPrefix(), '/') . '/' . $path;
         }
         return $path;
     }

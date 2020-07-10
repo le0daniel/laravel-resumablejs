@@ -1,5 +1,7 @@
 <?php
 
+use le0daniel\Laravel\ResumableJs\Upload\NativeFileCombiner;
+
 return [
 
     /*
@@ -42,6 +44,17 @@ return [
         'disk' => 'local',
         'folder' => 'chunks',
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Storage
+    |--------------------------------------------------------------------------
+    |
+    | Class used to combine all files together
+    | Must implement FileCombiner
+    |
+    */
+    'file_combiner' => NativeFileCombiner::class,
 
     /*
     |--------------------------------------------------------------------------
