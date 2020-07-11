@@ -94,7 +94,7 @@ final class UploadController extends BaseController
         return new FileUpload(
             [
                 'name' => basename($attributes['name']),
-                'size' => (int)$attributes['name'],
+                'size' => (int)$attributes['size'],
                 'type' => $attributes['type'],
                 'extension' => Files::getExtension($attributes['name']),
                 'chunks' => $this->getChunks($attributes['size']),
