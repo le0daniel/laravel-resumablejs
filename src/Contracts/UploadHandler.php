@@ -52,24 +52,39 @@ abstract class UploadHandler
      *
      * @return bool
      */
-    abstract public function processAsync(): bool;
+    public function processAsync(): bool {
+        return false;
+    }
 
     /**
      * Process the uploaded file
      *
      * @param \SplFileInfo $file
      * @param FileUpload $fileUpload
-     * @return array
+     * @return null|array
      */
-    abstract public function process(\SplFileInfo $file, FileUpload $fileUpload): array;
+    abstract public function handle(\SplFileInfo $file, FileUpload $fileUpload): ?array;
 
     /**
-     * Broadcast the event on the correct channel when uploading async
+     * Inform the client of a failure to process the File asynchronously.
+     * Note, the exceptions are not filtered here. All exceptions are passed to the client.
      *
      * @param FileUpload $fileUpload
      * @param string $broadcastKey
-     * @param array $processedData
-     * @return void
+     * @param \Exception $exception
      */
-    abstract public function broadcast(FileUpload $fileUpload, string $broadcastKey, array $processedData);
+    public function broadcastFailedAsyncProcessing(FileUpload $fileUpload, string $broadcastKey, \Exception $exception): void {
+
+    }
+
+    /**
+     * Inform the client that the processing of the file with the key was done.
+     *
+     * @param FileUpload $fileUpload
+     * @param string $broadcastKey
+     * @param array|null $processedData
+     */
+    public function broadcastProcessedAsync(FileUpload $fileUpload, string $broadcastKey, ?array $processedData): void {
+
+    }
 }

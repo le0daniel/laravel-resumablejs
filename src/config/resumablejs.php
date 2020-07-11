@@ -33,37 +33,13 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Storage
+    | Tmp Directory to store the uploaded files
     |--------------------------------------------------------------------------
     |
-    | Specify the disk and folder to use.
-    | It's important, that is must be a local drive.
-    |
-    */
-    'storage' => [
-        'disk' => 'local',
-        'folder' => 'chunks',
-    ],
-
-    /*
-    |--------------------------------------------------------------------------
-    | Storage
-    |--------------------------------------------------------------------------
-    |
-    | Class used to combine all files together
-    | Must implement FileCombiner
+    | This directory must exist and be writable
     |
     */
-    'file_combiner' => NativeFileCombiner::class,
-
-    /*
-    |--------------------------------------------------------------------------
-    | Validation
-    |--------------------------------------------------------------------------
-    |
-    | Disable mime type validation depending on system.
-    */
-    'validate_mime_type' => true,
+    'tmp_directory' => storage_path('tmp'),
 
     /**
      * Request Keys.
@@ -78,7 +54,7 @@ return [
     | Handlers
     |--------------------------------------------------------------------------
     |
-    | Specify a list of handlers. Handlers must extend the HandlerContract
+    | Specify a list of handlers. Handlers must extend the UploadHandler
     | (le0daniel\LaravelResumableJs\Contracts\UploadHandler)
     |
     */

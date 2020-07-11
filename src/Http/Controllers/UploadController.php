@@ -22,7 +22,8 @@ use le0daniel\LaravelResumableJs\Http\Requests\InitRequest;
 use le0daniel\LaravelResumableJs\Http\Requests\UploadRequest;
 use le0daniel\LaravelResumableJs\Http\Responses\ApiResponse;
 use le0daniel\LaravelResumableJs\Models\FileUpload;
-use le0daniel\LaravelResumableJs\Upload\Manager;
+use le0daniel\LaravelResumableJs\Upload\InvalidChunksException;
+use le0daniel\LaravelResumableJs\Upload\UploadService;
 use le0daniel\LaravelResumableJs\Utility\Files;
 use le0daniel\LaravelResumableJs\Utility\Tokens;
 
@@ -133,18 +134,7 @@ final class UploadController extends BaseController
         );
     }
 
-    public function check(CheckRequest $request, Manager $manager)
-    {
-        $attributes = $request->validated();
-        $complete = $manager->hasCompletedChunk(
-            $this->getUncompletedFileUpload($attributes['token']),
-            $request->getChunkNumber()
-        );
-
-        return response('', $complete ? 200 : 204);
-    }
-
-    public function upload(UploadRequest $request, Manager $manager)
+    public function upload(UploadRequest $request, UploadService $manager)
     {
         $attributes = $request->validated();
 
@@ -157,12 +147,20 @@ final class UploadController extends BaseController
         return response('', 200);
     }
 
-    public function complete(CompleteRequest $request, Manager $manager)
+    public function complete(CompleteRequest $request, UploadService $manager): ApiResponse
     {
         $attributes = $request->validated();
-        return $manager->process(
-            $this->getUncompletedFileUpload($attributes['token'])
-        );
+
+        try {
+            $response = $manager->completeUpload(
+                $this->getUncompletedFileUpload($attributes['token'])
+            );
+        } catch (InvalidChunksException $exception) {
+            return ApiResponse::error('Could not locate the chunks. Did you upload all chunk files?', 422);
+        }
+
+
+        return ApiResponse::successful($response);
     }
 
 }

@@ -11,7 +11,7 @@ namespace le0daniel\LaravelResumableJs\Providers;
 use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\ServiceProvider;
-use le0daniel\LaravelResumableJs\Upload\Manager;
+use le0daniel\LaravelResumableJs\Upload\UploadService;
 
 class ResumableJsProvider extends ServiceProvider
 {

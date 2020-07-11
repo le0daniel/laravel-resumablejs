@@ -8,10 +8,7 @@ prefix('upload')
     ->group(
         static function () {
             Route::post('init', [UploadController::class, 'init']);
-
-            Route::get('', [UploadController::class, 'check']);
             Route::post('', [UploadController::class, 'upload']);
-
             Route::post('complete', [UploadController::class, 'complete']);
         }
     );
