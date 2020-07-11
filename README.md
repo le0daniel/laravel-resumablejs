@@ -18,7 +18,7 @@ The package comes with a config, so you should publish the package using
 
 ### Installation
 In the `resumablejs.php` config file, you need to declare Handlers to use this package.
-A handler always needs to implement the `le0daniel\Laravel\ResumableJs\Contracts\UploadHandler` Contract.
+A handler always needs to extend the `le0daniel\LaravelResumableJs\Contracts\UploadHandler` Contract.
 
 The methods to implement are pretty straight forward.
 
@@ -53,14 +53,14 @@ r.on('fileAdded', file => {
 
     // Make the init call
     axios.post('/upload/init',{
-        handler:'basic',
+        handler:'basic', // name defined in config
         size: file.size,
         type: file.file.type,
         name: file.fileName
     }).then(response => {
-        if(response.data.token){
+        if(response.data.data.token){
             // Save the token to the file
-            file.token = response.data.token;
+            file.token = response.data.data.token;
             file.pause(false);
             r.upload();
         }
@@ -77,9 +77,9 @@ As soon as the upload is done, we will call the complete endpoint to process the
 ```
 r.on('fileSuccess', file => {
     axios.post('/upload/complete',{
-        token:file.token
+        token: file.token
     }).then(response => {
-        console.log(response);
+        console.log(response.data);
     })
 })
 ```
