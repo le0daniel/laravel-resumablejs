@@ -8,7 +8,6 @@
 
 namespace le0daniel\LaravelResumableJs\Contracts;
 
-
 use Illuminate\Http\Request;
 use le0daniel\LaravelResumableJs\Models\FileUpload;
 use le0daniel\LaravelResumableJs\Upload\UploadProcessingException;
@@ -33,27 +32,17 @@ abstract class UploadHandler
      * You can use {$fileUpload->appendToPayload($key, $value)} for that.
      * @param FileUpload $fileUpload
      */
-    public function afterValidation(FileUpload $fileUpload): void {
-
+    public function afterValidation(FileUpload $fileUpload, Request $request): void
+    {
     }
-
-    /**
-     * Return the payload which should be added to the File upload
-     * Ex.: If you upload an Image, save the user_id for processing later
-     *
-     * @param FileUpload $fileUpload
-     * @param array $payload
-     * @param Request $request
-     * @return array|null
-     */
-    abstract public function payload(FileUpload $fileUpload, array $payload, Request $request):?array;
 
     /**
      * Bool if the file should be processed async
      *
      * @return bool
      */
-    public function processAsync(): bool {
+    public function processAsync(): bool
+    {
         return false;
     }
 
@@ -63,10 +52,10 @@ abstract class UploadHandler
      * UploadProcessingException::with('user message', 'internal message') to show return messages
      * to the client.
      *
-     * @throws UploadProcessingException
      * @param \SplFileInfo $file
      * @param FileUpload $fileUpload
      * @return null|array
+     * @throws UploadProcessingException
      */
     abstract public function handle(\SplFileInfo $file, FileUpload $fileUpload): ?array;
 
@@ -78,8 +67,11 @@ abstract class UploadHandler
      * @param string $broadcastKey
      * @param \Exception $exception
      */
-    public function broadcastFailedAsyncProcessing(FileUpload $fileUpload, string $broadcastKey, \Exception $exception): void {
-
+    public function broadcastFailedAsyncProcessing(
+        FileUpload $fileUpload,
+        string $broadcastKey,
+        \Exception $exception
+    ): void {
     }
 
     /**
@@ -89,7 +81,7 @@ abstract class UploadHandler
      * @param string $broadcastKey
      * @param array|null $processedData
      */
-    public function broadcastProcessedAsync(FileUpload $fileUpload, string $broadcastKey, ?array $processedData): void {
-
+    public function broadcastProcessedAsync(FileUpload $fileUpload, string $broadcastKey, ?array $processedData): void
+    {
     }
 }

@@ -98,6 +98,7 @@ final class UploadController extends BaseController
                 'type' => $attributes['type'],
                 'extension' => Files::getExtension($attributes['name']),
                 'chunks' => $this->getChunks($attributes['size']),
+                'payload' => $attributes['payload'],
             ]
         );
     }
@@ -118,7 +119,7 @@ final class UploadController extends BaseController
 
         $fileUpload = $this->createFileUpload($attributes);
         try {
-            $this->handler->afterValidation($fileUpload);
+            $this->handler->afterValidation($fileUpload, $request);
         } catch (Exception $exception) {
             Log::debug('Validation failed.', ['exception' => $exception]);
             abort(422, 'Invalid File');
