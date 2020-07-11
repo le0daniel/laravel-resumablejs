@@ -58,7 +58,7 @@ final class UploadService
         return
             config('resumablejs.async', false)
             && (
-                $handler->processAsync() || $fileUpload->size > (100 * 1024 * 1024)
+                $handler->supportsAsyncProcessing() || $fileUpload->size > (100 * 1024 * 1024)
             );
     }
 
@@ -78,7 +78,7 @@ final class UploadService
         $uploadedFile = new SplFileInfo($this->combineChunks($fileUpload));
 
         try {
-            $handler->fileValidation($uploadedFile, $fileUpload);
+            $handler->validateUploadedFile($uploadedFile, $fileUpload);
             $response = $handler->handle($uploadedFile, $fileUpload);
         } catch (\Exception $exception) {
             Files::deleteIfExists($uploadedFile);

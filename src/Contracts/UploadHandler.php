@@ -32,7 +32,7 @@ abstract class UploadHandler
      * You can use {$fileUpload->appendToPayload($key, $value)} for that.
      * @param FileUpload $fileUpload
      */
-    public function afterValidation(FileUpload $fileUpload, Request $request): void
+    public function afterPayloadValidation(FileUpload $fileUpload, Request $request): void
     {
     }
 
@@ -43,7 +43,7 @@ abstract class UploadHandler
      * @param \SplFileInfo $file
      * @param FileUpload $fileUpload
      */
-    public function fileValidation(\SplFileInfo $file, FileUpload $fileUpload): void
+    public function validateUploadedFile(\SplFileInfo $file, FileUpload $fileUpload): void
     {
     }
 
@@ -52,7 +52,7 @@ abstract class UploadHandler
      *
      * @return bool
      */
-    public function processAsync(): bool
+    public function supportsAsyncProcessing(): bool
     {
         return false;
     }

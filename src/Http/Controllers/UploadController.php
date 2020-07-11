@@ -114,7 +114,7 @@ final class UploadController extends BaseController
         $fileUpload = $this->createFileUpload($request->validated());
 
         try {
-            $this->handler->afterValidation($fileUpload, $request);
+            $this->handler->afterPayloadValidation($fileUpload, $request);
         } catch (Exception $exception) {
             Log::debug('Validation failed.', ['exception' => $exception]);
             return ApiResponse::error('Input validation failed', 422);
