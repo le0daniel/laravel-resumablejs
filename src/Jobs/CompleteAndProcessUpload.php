@@ -6,7 +6,7 @@
  * Time: 17:44
  */
 
-namespace le0daniel\Laravel\ResumableJs\Jobs;
+namespace le0daniel\LaravelResumableJs\Jobs;
 
 use Illuminate\Bus\Queueable;
 use Illuminate\Queue\SerializesModels;
@@ -16,12 +16,12 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
-use le0daniel\Laravel\ResumableJs\Contracts\UploadHandler;
-use le0daniel\Laravel\ResumableJs\Models\FileUpload;
-use le0daniel\Laravel\ResumableJs\Upload\CatFileCombiner;
-use le0daniel\Laravel\ResumableJs\Contracts\FileCombiner;
-use le0daniel\Laravel\ResumableJs\Upload\NativeFileCombiner;
-use le0daniel\Laravel\ResumableJs\Upload\UploadedFile;
+use le0daniel\LaravelResumableJs\Contracts\UploadHandler;
+use le0daniel\LaravelResumableJs\Models\FileUpload;
+use le0daniel\LaravelResumableJs\Upload\CatFileCombiner;
+use le0daniel\LaravelResumableJs\Contracts\FileCombiner;
+use le0daniel\LaravelResumableJs\Upload\NativeFileCombiner;
+use le0daniel\LaravelResumableJs\Upload\UploadedFile;
 use Symfony\Component\Process\Process;
 
 class CompleteAndProcessUpload implements ShouldQueue

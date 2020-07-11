@@ -6,9 +6,9 @@
  * Time: 16:56
  */
 
-namespace le0daniel\Laravel\ResumableJs\Upload;
+namespace le0daniel\LaravelResumableJs\Upload;
 
-use le0daniel\Laravel\ResumableJs\Contracts\FileCombiner;
+use le0daniel\LaravelResumableJs\Contracts\FileCombiner;
 use Symfony\Component\Process\Process;
 
 class CatFileCombiner implements FileCombiner

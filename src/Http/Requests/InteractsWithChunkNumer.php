@@ -1,6 +1,6 @@
 <?php
 
-namespace le0daniel\Laravel\ResumableJs\Http\Requests;
+namespace le0daniel\LaravelResumableJs\Http\Requests;
 
 trait InteractsWithChunkNumer
 {

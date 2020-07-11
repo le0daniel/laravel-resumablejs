@@ -6,11 +6,11 @@
  * Time: 14:43
  */
 
-namespace le0daniel\Laravel\ResumableJs\Contracts;
+namespace le0daniel\LaravelResumableJs\Contracts;
 
 
 use Illuminate\Http\Request;
-use le0daniel\Laravel\ResumableJs\Models\FileUpload;
+use le0daniel\LaravelResumableJs\Models\FileUpload;
 
 abstract class UploadHandler
 {

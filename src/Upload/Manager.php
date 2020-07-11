@@ -6,7 +6,7 @@
  * Time: 16:23
  */
 
-namespace le0daniel\Laravel\ResumableJs\Upload;
+namespace le0daniel\LaravelResumableJs\Upload;
 
 
 use Faker\Provider\File;
@@ -15,9 +15,9 @@ use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Str;
-use le0daniel\Laravel\ResumableJs\Contracts\UploadHandler;
-use le0daniel\Laravel\ResumableJs\Jobs\CompleteAndProcessUpload;
-use le0daniel\Laravel\ResumableJs\Models\FileUpload;
+use le0daniel\LaravelResumableJs\Contracts\UploadHandler;
+use le0daniel\LaravelResumableJs\Jobs\CompleteAndProcessUpload;
+use le0daniel\LaravelResumableJs\Models\FileUpload;
 use League\Flysystem\Adapter\Local;
 
 class Manager

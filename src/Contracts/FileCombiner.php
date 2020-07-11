@@ -6,7 +6,7 @@
  * Time: 16:57
  */
 
-namespace le0daniel\Laravel\ResumableJs\Contracts;
+namespace le0daniel\LaravelResumableJs\Contracts;
 
 
 interface FileCombiner

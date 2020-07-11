@@ -10,13 +10,13 @@
   ],
   "autoload": {
     "psr-4": {
-      "le0daniel\\Laravel\\ResumableJs\\": "src/"
+      "le0daniel\\LaravelResumableJs\\": "src/"
     }
   },
   "extra": {
     "laravel": {
       "providers": [
-        "le0daniel\\Laravel\\ResumableJs\\Providers\\ResumableJsProvider"
+        "le0daniel\\LaravelResumableJs\\Providers\\ResumableJsProvider"
       ]
     }
   },

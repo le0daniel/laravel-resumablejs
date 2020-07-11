@@ -6,7 +6,7 @@
  * Time: 09:23
  */
 
-namespace le0daniel\Laravel\ResumableJs\Upload;
+namespace le0daniel\LaravelResumableJs\Upload;
 
 
 class UploadedFile extends \SplFileInfo

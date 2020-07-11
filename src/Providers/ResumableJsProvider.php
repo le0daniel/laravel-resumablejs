@@ -6,12 +6,12 @@
  * Time: 14:22
  */
 
-namespace le0daniel\Laravel\ResumableJs\Providers;
+namespace le0daniel\LaravelResumableJs\Providers;
 
 use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\ServiceProvider;
-use le0daniel\Laravel\ResumableJs\Upload\Manager;
+use le0daniel\LaravelResumableJs\Upload\Manager;
 
 class ResumableJsProvider extends ServiceProvider
 {

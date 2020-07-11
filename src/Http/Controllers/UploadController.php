@@ -6,7 +6,7 @@
  * Time: 14:35
  */
 
-namespace le0daniel\Laravel\ResumableJs\Http\Controllers;
+namespace le0daniel\LaravelResumableJs\Http\Controllers;
 
 use Exception;
 use Illuminate\Foundation\Validation\ValidatesRequests;
@@ -15,16 +15,16 @@ use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
-use le0daniel\Laravel\ResumableJs\Contracts\UploadHandler;
-use le0daniel\Laravel\ResumableJs\Http\Requests\CheckRequest;
-use le0daniel\Laravel\ResumableJs\Http\Requests\CompleteRequest;
-use le0daniel\Laravel\ResumableJs\Http\Requests\InitRequest;
-use le0daniel\Laravel\ResumableJs\Http\Requests\UploadRequest;
-use le0daniel\Laravel\ResumableJs\Http\Responses\ApiResponse;
-use le0daniel\Laravel\ResumableJs\Models\FileUpload;
-use le0daniel\Laravel\ResumableJs\Upload\Manager;
-use le0daniel\Laravel\ResumableJs\Utility\Files;
-use le0daniel\Laravel\ResumableJs\Utility\Tokens;
+use le0daniel\LaravelResumableJs\Contracts\UploadHandler;
+use le0daniel\LaravelResumableJs\Http\Requests\CheckRequest;
+use le0daniel\LaravelResumableJs\Http\Requests\CompleteRequest;
+use le0daniel\LaravelResumableJs\Http\Requests\InitRequest;
+use le0daniel\LaravelResumableJs\Http\Requests\UploadRequest;
+use le0daniel\LaravelResumableJs\Http\Responses\ApiResponse;
+use le0daniel\LaravelResumableJs\Models\FileUpload;
+use le0daniel\LaravelResumableJs\Upload\Manager;
+use le0daniel\LaravelResumableJs\Utility\Files;
+use le0daniel\LaravelResumableJs\Utility\Tokens;
 
 final class UploadController extends BaseController
 {

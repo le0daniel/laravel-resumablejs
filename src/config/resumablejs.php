@@ -1,6 +1,6 @@
 <?php
 
-use le0daniel\Laravel\ResumableJs\Upload\NativeFileCombiner;
+use le0daniel\LaravelResumableJs\Upload\NativeFileCombiner;
 
 return [
 
@@ -79,11 +79,11 @@ return [
     |--------------------------------------------------------------------------
     |
     | Specify a list of handlers. Handlers must extend the HandlerContract
-    | (le0daniel\Laravel\ResumableJs\Contracts\UploadHandler)
+    | (le0daniel\LaravelResumableJs\Contracts\UploadHandler)
     |
     */
     'handlers' => [
-        //'basic' => \le0daniel\Laravel\ResumableJs\Handlers\BasicHandler::class,
+        //'basic' => \le0daniel\LaravelResumableJs\Handlers\BasicHandler::class,
     ],
 
 

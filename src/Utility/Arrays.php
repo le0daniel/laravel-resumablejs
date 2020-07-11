@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace le0daniel\Laravel\ResumableJs\Utility;
+namespace le0daniel\LaravelResumableJs\Utility;
 
 final class Arrays
 {

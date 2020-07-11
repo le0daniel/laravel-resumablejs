@@ -1,11 +1,11 @@
 <?php
 
-namespace le0daniel\Laravel\ResumableJs\Http\Responses;
+namespace le0daniel\LaravelResumableJs\Http\Responses;
 
 use Illuminate\Contracts\Support\Responsable;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
-use le0daniel\Laravel\ResumableJs\Utility\Arrays;
+use le0daniel\LaravelResumableJs\Utility\Arrays;
 
 final class ApiResponse implements Responsable
 {
