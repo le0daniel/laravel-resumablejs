@@ -28,7 +28,7 @@ use Illuminate\Support\Arr;
 class FileUpload extends Model
 {
     protected $table = 'fileuploads';
-    protected $fillable = ['size', 'chunks', 'name', 'extension', 'type'];
+    protected $fillable = ['size', 'chunks', 'name', 'extension', 'type', 'payload'];
     protected $casts = [
         'payload' => 'array',
         'is_complete',
