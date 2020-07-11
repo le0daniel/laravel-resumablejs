@@ -1,13 +1,17 @@
 <?php
 
-\Illuminate\Support\Facades\Route::namespace('le0daniel\\Laravel\\ResumableJs\\Http\\Controllers')
-    ->prefix('upload')
-    ->group(function(){
+use Illuminate\Support\Facades\Route;
+use le0daniel\Laravel\ResumableJs\Http\Controllers\UploadController;
 
-        \Illuminate\Support\Facades\Route::post('init','UploadController@init');
+Route::
+prefix('upload')
+    ->group(
+        static function () {
+            Route::post('init', [UploadController::class, 'init']);
 
-        \Illuminate\Support\Facades\Route::get('','UploadController@check');
-        \Illuminate\Support\Facades\Route::post('','UploadController@upload');
+            Route::get('', [UploadController::class, 'check']);
+            Route::post('', [UploadController::class, 'upload']);
 
-        \Illuminate\Support\Facades\Route::post('complete','UploadController@complete');
-    });
+            Route::post('complete', [UploadController::class, 'complete']);
+        }
+    );

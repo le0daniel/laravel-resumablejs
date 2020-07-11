@@ -65,6 +65,13 @@ return [
     */
     'validate_mime_type' => true,
 
+    /**
+     * Request Keys.
+     */
+    'request_keys' => [
+        'chunk_number' => 'resumableChunkNumber'
+    ],
+
 
     /*
     |--------------------------------------------------------------------------

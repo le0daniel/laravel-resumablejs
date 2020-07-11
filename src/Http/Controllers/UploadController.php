@@ -8,215 +8,160 @@
 
 namespace le0daniel\Laravel\ResumableJs\Http\Controllers;
 
-use Faker\Provider\File;
+use Exception;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\App;
-use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
 use le0daniel\Laravel\ResumableJs\Contracts\UploadHandler;
+use le0daniel\Laravel\ResumableJs\Http\Requests\CheckRequest;
+use le0daniel\Laravel\ResumableJs\Http\Requests\CompleteRequest;
+use le0daniel\Laravel\ResumableJs\Http\Requests\InitRequest;
+use le0daniel\Laravel\ResumableJs\Http\Requests\UploadRequest;
+use le0daniel\Laravel\ResumableJs\Http\Responses\ApiResponse;
 use le0daniel\Laravel\ResumableJs\Models\FileUpload;
 use le0daniel\Laravel\ResumableJs\Upload\Manager;
+use le0daniel\Laravel\ResumableJs\Utility\Files;
+use le0daniel\Laravel\ResumableJs\Utility\Tokens;
 
-class UploadController extends BaseController
+final class UploadController extends BaseController
 {
+    private const UPLOAD_INIT_URI = 'upload/init';
     use ValidatesRequests;
 
-    /**
-     * @var UploadHandler
-     */
-    protected $handler;
+    private UploadHandler $handler;
 
-    /**
-     * UploadController constructor.
-     * @param Request $request
-     * @throws \Exception
-     */
     public function __construct(Request $request)
     {
-        if (!$this->hasHandlers()) {
-            throw new \Exception('No upload handlers defined.');
+        if (!$this->hasDefinedHandlers()) {
+            abort('No handlers  defined', 422);
         }
 
-        if ($request->route()->uri !== 'upload/init') {
-            return;
-        }
-
-        // Add the handler middleware
-        $this->handler = $this->getHandler($request->get('handler', ''));
-        if ($middleware = $this->handler->middleware()) {
-            $this->middleware($middleware);
+        if ($this->isInitCall($request)) {
+            $this->applyHandler(
+                $this->getHandler($request->get('handler', ''))
+            );
         }
     }
 
-    /**
-     * Check if handlers are defined
-     *
-     * @return bool
-     */
-    protected function hasHandlers(): bool
+    private function hasDefinedHandlers(): bool
     {
         return !empty(config('resumablejs.handlers', false));
     }
 
-    /**
-     * Get the handler by name
-     *
-     * @param string $handlerName
-     * @return UploadHandler
-     */
-    protected function getHandler(string $handlerName): UploadHandler
+    private function isInitCall(Request $request): bool
+    {
+        return $request->route()->uri === self::UPLOAD_INIT_URI;
+    }
+
+    private function applyHandler(UploadHandler $handler): void
+    {
+        $this->handler = $handler;
+        if ($middleware = $handler->middleware()) {
+            $this->middleware($middleware);
+        }
+    }
+
+    private function getHandler(string $handlerName): UploadHandler
     {
         $handlers = config('resumablejs.handlers');
 
         if (!array_key_exists($handlerName, $handlers)) {
-            abort(404,'Handler not found.');
+            abort(404, 'Handler not found.');
         }
 
         return App::make($handlers[$handlerName]);
     }
 
-    /**
-     * Generates a unique token
-     * @return string
-     */
-    protected function generateUniqueToken(): string
-    {
-        return strtolower(Str::random(64));
-    }
-
-    /**
-     * Get the uncomplete file upload
-     *
-     * @param string $token
-     * @return FileUpload
-     */
-    protected function getFileUploadOrFail(string $token): FileUpload
+    private function getUncompletedFileUpload(string $token): FileUpload
     {
         return FileUpload::where('token', '=', $token)
             ->where('is_complete', '=', 0)
             ->firstOrFail();
     }
 
-    /**
-     * Makes sure a handler was found and it s middlewares enforced
-     */
-    protected function hasHandlerOrFail()
+    private function getChunks(int $fileSize): int
     {
-        // Make sure a handler is set
-        if (!isset($this->handler)) {
-            abort(404,'Handler not found');
-        }
+        return ceil($fileSize / config('resumablejs.chunk_size'));
     }
 
-    /**
-     * @param Request $request
-     * @return array
-     * @throws \Illuminate\Validation\ValidationException
-     * @throws \Throwable
-     */
-    public function init(Request $request)
+    private function createFileUpload(array $attributes): FileUpload
     {
-        $this->hasHandlerOrFail();
+        return new FileUpload(
+            [
+                'name' => basename($attributes['name']),
+                'size' => (int)$attributes['name'],
+                'type' => $attributes['type'],
+                'extension' => Files::getExtension($attributes['name']),
+                'chunks' => $this->getChunks($attributes['size']),
+            ]
+        );
+    }
 
-        // Validate the request
-        $this->validate($request, [
-            'size' => 'required|integer|min:1',
-            'name' => 'required|string',
-            'type' => 'required|string',
-            'payload' => 'nullable|array'
-        ]);
+    private function validatePayload(array $payload): array
+    {
+        if (!$rules = $this->handler->payloadRules()) {
+            return [];
+        }
 
-        // Extract all data
-        $name = basename((string)$request->get('name'));
-        $size = intval($request->get('size'));
-        $payload = $request->get('payload', []);
-        $fileUpload = new FileUpload([
-            'name' => $name,
-            'size' => $size,
-            'type' => (string)$request->get('type'),
-            'extension' => pathinfo($name, PATHINFO_EXTENSION),
-            'chunks' => ceil($size / config('resumablejs.chunk_size')),
-        ]);
+        return Validator::make($payload, $rules)->validate();
+    }
 
+    public function init(InitRequest $request): ApiResponse
+    {
+        $attributes = $request->validated();
+        $attributes['payload'] = $this->validatePayload($attributes['payload']);
+
+        $fileUpload = $this->createFileUpload($attributes);
         try {
-            $this->handler->validateOrFail($fileUpload, $payload, $request);
-        } catch (\Exception $e) {
+            $this->handler->afterValidation($fileUpload);
+        } catch (Exception $exception) {
+            Log::debug('Validation failed.', ['exception' => $exception]);
             abort(422, 'Invalid File');
         }
 
-        // Add the payload
-        $fileUpload->payload = $this->handler->payload($fileUpload, $payload, $request);
-        $fileUpload->token = $this->generateUniqueToken();
+        $fileUpload->token = Tokens::generateRandom();
         $fileUpload->handler = get_class($this->handler);
         $fileUpload->saveOrFail();
 
-        return [
-            'success' => true,
-            'token' => $fileUpload->token
-        ];
+        return ApiResponse::successful(
+            [
+                'token' => $fileUpload->token,
+            ]
+        );
     }
 
-    /**
-     * @param Request $request
-     * @return \Illuminate\Contracts\Routing\ResponseFactory|\Illuminate\Http\Response
-     * @throws \Illuminate\Validation\ValidationException
-     */
-    public function check(Request $request, Manager $manager)
+    public function check(CheckRequest $request, Manager $manager)
     {
-        $this->validate($request, [
-            'token' => 'required|string|size:64',
-            'resumableChunkNumber' => 'required|integer|min:1'
-        ]);
-
+        $attributes = $request->validated();
         $complete = $manager->hasCompletedChunk(
-            $this->getFileUploadOrFail($request->get('token')),
-            $request->get('resumableChunkNumber')
+            $this->getUncompletedFileUpload($attributes['token']),
+            $request->getChunkNumber()
         );
 
         return response('', $complete ? 200 : 204);
     }
 
-    /**
-     * @param Request $request
-     * @param Manager $manager
-     * @return \Illuminate\Contracts\Routing\ResponseFactory|\Illuminate\Http\Response
-     * @throws \Illuminate\Validation\ValidationException|\Exception
-     */
-    public function upload(Request $request, Manager $manager)
+    public function upload(UploadRequest $request, Manager $manager)
     {
-        $this->validate($request, [
-            'token' => 'required|string|size:64',
-            'resumableChunkNumber' => 'required|integer|min:1',
-            'file' => 'required|file|max:' . config('resumablejs.chunk_size')
-        ]);
+        $attributes = $request->validated();
 
-        // Upload a chunk
         $manager->handleChunk(
-            $this->getFileUploadOrFail($request->get('token')),
-            $request->get('resumableChunkNumber'),
+            $this->getUncompletedFileUpload($attributes['token']),
+            $request->getChunkNumber(),
             $request->file('file')
         );
 
         return response('', 200);
     }
 
-    /**
-     * @param Request $request
-     * @param Manager $manager
-     * @return array
-     * @throws \Illuminate\Validation\ValidationException
-     * @throws \Throwable
-     */
-    public function complete(Request $request, Manager $manager)
+    public function complete(CompleteRequest $request, Manager $manager)
     {
-        $this->validate($request, [
-            'token' => 'required|string|size:64',
-        ]);
-
-        /* Complete the upload */
+        $attributes = $request->validated();
         return $manager->process(
-            $this->getFileUploadOrFail($request->get('token'))
+            $this->getUncompletedFileUpload($attributes['token'])
         );
     }
 

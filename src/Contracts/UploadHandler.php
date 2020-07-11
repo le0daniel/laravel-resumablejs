@@ -12,22 +12,29 @@ namespace le0daniel\Laravel\ResumableJs\Contracts;
 use Illuminate\Http\Request;
 use le0daniel\Laravel\ResumableJs\Models\FileUpload;
 
-interface UploadHandler
+abstract class UploadHandler
 {
     /**
-     * Return the middleware to load
+     * Return the middleware to load on the init call.
+     * By default, no middlewares are applied.
      * @return array|null
      */
-    public function middleware(): ?array;
+    abstract public function middleware(): ?array;
 
     /**
-     * Validate the upload of throw an exception
-     *
-     * @param FileUpload $fileUpload
-     * @throws \Exception
-     * @return void
+     * Validation rules for the payload
      */
-    public function validateOrFail(FileUpload $fileUpload, array $payload, Request $request): void;
+    abstract public function payloadRules(): ?array;
+
+    /**
+     * Perform some other checks after the validation is done.
+     * This is also the place where you can add attributes to the payload.
+     * You can use {$fileUpload->appendToPayload($key, $value)} for that.
+     * @param FileUpload $fileUpload
+     */
+    public function afterValidation(FileUpload $fileUpload): void {
+
+    }
 
     /**
      * Return the payload which should be added to the File upload
@@ -38,14 +45,14 @@ interface UploadHandler
      * @param Request $request
      * @return array|null
      */
-    public function payload(FileUpload $fileUpload, array $payload, Request $request):?array;
+    abstract public function payload(FileUpload $fileUpload, array $payload, Request $request):?array;
 
     /**
      * Bool if the file should be processed async
      *
      * @return bool
      */
-    public function processAsync(): bool;
+    abstract public function processAsync(): bool;
 
     /**
      * Process the uploaded file
@@ -54,7 +61,7 @@ interface UploadHandler
      * @param FileUpload $fileUpload
      * @return array
      */
-    public function process(\SplFileInfo $file, FileUpload $fileUpload): array;
+    abstract public function process(\SplFileInfo $file, FileUpload $fileUpload): array;
 
     /**
      * Broadcast the event on the correct channel when uploading async
@@ -64,5 +71,5 @@ interface UploadHandler
      * @param array $processedData
      * @return void
      */
-    public function broadcast(FileUpload $fileUpload, string $broadcastKey, array $processedData);
+    abstract public function broadcast(FileUpload $fileUpload, string $broadcastKey, array $processedData);
 }

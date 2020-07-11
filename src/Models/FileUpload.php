@@ -8,8 +8,8 @@
 
 namespace le0daniel\Laravel\ResumableJs\Models;
 
-
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Arr;
 
 /**
  * Class FileUpload
@@ -28,10 +28,17 @@ use Illuminate\Database\Eloquent\Model;
 class FileUpload extends Model
 {
     protected $table = 'fileuploads';
-    protected $fillable = ['size','chunks','name','extension','type'];
+    protected $fillable = ['size', 'chunks', 'name', 'extension', 'type'];
     protected $casts = [
         'payload' => 'array',
-        'is_complete'
+        'is_complete',
     ];
+
+    public function appendToPayload(string $key, $value): void
+    {
+        $payload = $this->payload;
+        Arr::set($payload, $key, $value);
+        $this->payload = $payload;
+    }
 
 }
