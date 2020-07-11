@@ -23,6 +23,7 @@ use le0daniel\LaravelResumableJs\Http\Requests\UploadRequest;
 use le0daniel\LaravelResumableJs\Http\Responses\ApiResponse;
 use le0daniel\LaravelResumableJs\Models\FileUpload;
 use le0daniel\LaravelResumableJs\Upload\InvalidChunksException;
+use le0daniel\LaravelResumableJs\Upload\UploadProcessingException;
 use le0daniel\LaravelResumableJs\Upload\UploadService;
 use le0daniel\LaravelResumableJs\Utility\Files;
 use le0daniel\LaravelResumableJs\Utility\Tokens;
@@ -157,8 +158,9 @@ final class UploadController extends BaseController
             );
         } catch (InvalidChunksException $exception) {
             return ApiResponse::error('Could not locate the chunks. Did you upload all chunk files?', 422);
+        } catch (UploadProcessingException $exception) {
+            return ApiResponse::error($exception->getUserMessage() ?? 'Internal Error', 422);
         }
-
 
         return ApiResponse::successful($response);
     }

@@ -11,6 +11,7 @@ namespace le0daniel\LaravelResumableJs\Contracts;
 
 use Illuminate\Http\Request;
 use le0daniel\LaravelResumableJs\Models\FileUpload;
+use le0daniel\LaravelResumableJs\Upload\UploadProcessingException;
 
 abstract class UploadHandler
 {
@@ -58,7 +59,11 @@ abstract class UploadHandler
 
     /**
      * Process the uploaded file
+     * During the handling you may throw {@see UploadProcessingException} using
+     * UploadProcessingException::with('user message', 'internal message') to show return messages
+     * to the client.
      *
+     * @throws UploadProcessingException
      * @param \SplFileInfo $file
      * @param FileUpload $fileUpload
      * @return null|array

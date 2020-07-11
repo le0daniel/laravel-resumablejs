@@ -94,7 +94,7 @@ final class UploadService
             ->onQueue(config('resumablejs.queue'));
         return [
             'async' => true,
-            'broadcasting_key' => $broadcastingKey
+            'broadcasting_key' => $broadcastingKey,
         ];
     }
 
@@ -105,9 +105,10 @@ final class UploadService
 
         try {
             $response = $this->process($handler, $fileUpload);
-            $handler->broadcastProcessedAsync($fileUpload,$broadcastKey, $response);
+            $handler->broadcastProcessedAsync($fileUpload, $broadcastKey, $response);
         } catch (\Exception $exception) {
             $handler->broadcastFailedAsyncProcessing($fileUpload, $broadcastKey, $exception);
+            throw $exception;
         }
     }
 

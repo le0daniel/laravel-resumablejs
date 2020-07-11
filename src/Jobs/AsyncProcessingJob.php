@@ -20,6 +20,9 @@ class AsyncProcessingJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
+    // Only allow 1 try.
+    public $tries = 1;
+
     public $fileUpload;
     protected $broadcastKey;
 
