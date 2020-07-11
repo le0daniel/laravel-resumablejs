@@ -55,34 +55,37 @@ final class UploadService
 
     private function shouldProcessAsync(UploadHandler $handler, FileUpload $fileUpload): bool
     {
-        return config('resumablejs.async', false) && ($handler->processAsync(
-                ) || $fileUpload->size > (100 * 1024 * 1024));
-    }
-
-    private function removeChunks(FileUpload $fileUpload): void
-    {
-        foreach ($this->getChunks($fileUpload) as $chunkFileName) {
-            unlink($chunkFileName);
-        }
+        return
+            config('resumablejs.async', false)
+            && (
+                $handler->processAsync() || $fileUpload->size > (100 * 1024 * 1024)
+            );
     }
 
     private function combineChunks(FileUpload $fileUpload): string
     {
         $combinedFile = Files::tmp('tmp');
-        Resources::combine($this->getChunks($fileUpload), $combinedFile);
-        $this->removeChunks($fileUpload);
+        $chunks = $this->getChunks($fileUpload);
+
+        Resources::combine($chunks, $combinedFile);
+        Files::deleteIfExists(...$chunks);
+
         return $combinedFile;
     }
 
     private function process(UploadHandler $handler, FileUpload $fileUpload): array
     {
         $uploadedFile = new SplFileInfo($this->combineChunks($fileUpload));
-        $response = $handler->handle($uploadedFile, $fileUpload);
 
-        if (file_exists($uploadedFile)) {
-            unlink($uploadedFile);
+        try {
+            $handler->fileValidation($uploadedFile, $fileUpload);
+            $response = $handler->handle($uploadedFile, $fileUpload);
+        } catch (\Exception $exception) {
+            Files::deleteIfExists($uploadedFile);
+            throw $exception;
         }
 
+        Files::deleteIfExists($uploadedFile);
         return $response ?? [];
     }
 

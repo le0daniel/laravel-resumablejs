@@ -37,6 +37,17 @@ abstract class UploadHandler
     }
 
     /**
+     * Hook called as soon as the file has been combined successfully. This is a good place to
+     * do some further checks like size, mimetype or a virus scan.
+     *
+     * @param \SplFileInfo $file
+     * @param FileUpload $fileUpload
+     */
+    public function fileValidation(\SplFileInfo $file, FileUpload $fileUpload): void
+    {
+    }
+
+    /**
      * Bool if the file should be processed async
      *
      * @return bool

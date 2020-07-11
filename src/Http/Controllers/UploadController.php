@@ -16,7 +16,6 @@ use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use le0daniel\LaravelResumableJs\Contracts\UploadHandler;
-use le0daniel\LaravelResumableJs\Http\Requests\CheckRequest;
 use le0daniel\LaravelResumableJs\Http\Requests\CompleteRequest;
 use le0daniel\LaravelResumableJs\Http\Requests\InitRequest;
 use le0daniel\LaravelResumableJs\Http\Requests\UploadRequest;
@@ -31,9 +30,9 @@ use le0daniel\LaravelResumableJs\Utility\Tokens;
 final class UploadController extends BaseController
 {
     private const UPLOAD_INIT_URI = 'upload/init';
-    use ValidatesRequests;
-
     private UploadHandler $handler;
+
+    use ValidatesRequests;
 
     public function __construct(Request $request)
     {
@@ -42,9 +41,8 @@ final class UploadController extends BaseController
         }
 
         if ($this->isInitCall($request)) {
-            $this->applyHandler(
-                $this->getHandler($request->get('handler', ''))
-            );
+            $this->handler = $this->getHandler($request->get('handler', ''));
+            $this->applyHandlerMiddleware();
         }
     }
 
@@ -58,10 +56,9 @@ final class UploadController extends BaseController
         return $request->route()->uri === self::UPLOAD_INIT_URI;
     }
 
-    private function applyHandler(UploadHandler $handler): void
+    private function applyHandlerMiddleware(): void
     {
-        $this->handler = $handler;
-        if ($middleware = $handler->middleware()) {
+        if ($middleware = $this->handler->middleware()) {
             $this->middleware($middleware);
         }
     }
@@ -84,11 +81,6 @@ final class UploadController extends BaseController
             ->firstOrFail();
     }
 
-    private function getChunks(int $fileSize): int
-    {
-        return ceil($fileSize / config('resumablejs.chunk_size'));
-    }
-
     private function createFileUpload(array $attributes): FileUpload
     {
         return new FileUpload(
@@ -97,13 +89,18 @@ final class UploadController extends BaseController
                 'size' => (int)$attributes['size'],
                 'type' => $attributes['type'],
                 'extension' => Files::getExtension($attributes['name']),
-                'chunks' => $this->getChunks($attributes['size']),
-                'payload' => $attributes['payload'],
+                'chunks' => $this->getChunkNumber($attributes['size']),
+                'payload' => $this->validatedPayload($attributes['payload']),
             ]
         );
     }
 
-    private function validatePayload(array $payload): array
+    private function getChunkNumber(int $fileSize): int
+    {
+        return ceil($fileSize / config('resumablejs.chunk_size'));
+    }
+
+    private function validatedPayload(array $payload): array
     {
         if (!$rules = $this->handler->payloadRules()) {
             return [];
@@ -114,15 +111,13 @@ final class UploadController extends BaseController
 
     public function init(InitRequest $request): ApiResponse
     {
-        $attributes = $request->validated();
-        $attributes['payload'] = $this->validatePayload($attributes['payload']);
+        $fileUpload = $this->createFileUpload($request->validated());
 
-        $fileUpload = $this->createFileUpload($attributes);
         try {
             $this->handler->afterValidation($fileUpload, $request);
         } catch (Exception $exception) {
             Log::debug('Validation failed.', ['exception' => $exception]);
-            abort(422, 'Invalid File');
+            return ApiResponse::error('Input validation failed', 422);
         }
 
         $fileUpload->token = Tokens::generateRandom();

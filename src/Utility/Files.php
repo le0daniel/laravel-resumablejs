@@ -58,4 +58,12 @@ final class Files
         return $filePath;
     }
 
+    public static function deleteIfExists(string ...$files): void {
+        foreach ($files as $file){
+            if (file_exists($file)) {
+                unlink($file);
+            }
+        }
+    }
+
 }
