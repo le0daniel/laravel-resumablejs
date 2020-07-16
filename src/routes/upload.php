@@ -7,7 +7,7 @@ Route::
 prefix('upload')
     ->group(
         static function () {
-            Route::post('init', [UploadController::class, 'init']);
+            Route::post('init', [UploadController::class, 'init'])->name('resumablejs.init');
             Route::post('', [UploadController::class, 'upload']);
             Route::post('complete', [UploadController::class, 'complete']);
         }

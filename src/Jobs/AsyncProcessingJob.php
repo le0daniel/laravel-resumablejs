@@ -16,7 +16,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use le0daniel\LaravelResumableJs\Models\FileUpload;
 use le0daniel\LaravelResumableJs\Upload\UploadService;
 
-class AsyncProcessingJob implements ShouldQueue
+final class AsyncProcessingJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 

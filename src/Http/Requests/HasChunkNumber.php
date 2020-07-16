@@ -2,7 +2,7 @@
 
 namespace le0daniel\LaravelResumableJs\Http\Requests;
 
-trait InteractsWithChunkNumer
+trait HasChunkNumber
 {
 
     protected function chunkNumberKey(): string {

@@ -4,7 +4,7 @@ namespace le0daniel\LaravelResumableJs\Http\Requests;
 
 final class CheckRequest extends JsonRequest
 {
-    use InteractsWithChunkNumer;
+    use HasChunkNumber;
 
     public function rules() {
         return [

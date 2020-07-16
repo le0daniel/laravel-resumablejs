@@ -22,7 +22,7 @@ class CreateFileuploadTable extends Migration
             $table->string('extension');
             $table->integer('chunks');
             $table->bigInteger('size');
-            $table->text('payload');
+            $table->json('payload');
             $table->boolean('is_complete')->default(0);
             $table->timestamps();
         });

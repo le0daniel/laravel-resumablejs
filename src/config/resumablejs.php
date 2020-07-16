@@ -1,7 +1,5 @@
 <?php
 
-use le0daniel\LaravelResumableJs\Upload\NativeFileCombiner;
-
 return [
 
     /*
@@ -17,7 +15,7 @@ return [
     | always processed in the background.
     |
     */
-    'async' => true,
+    'async' => false,
     'queue' => 'default',
 
     /*
@@ -36,8 +34,8 @@ return [
     | Tmp Directory to store the uploaded files
     |--------------------------------------------------------------------------
     |
-    | This directory must exist and be writable
-    |
+    | This directory must exist and be writable. All chunks are stored there
+    | during the upload process.
     */
     'tmp_directory' => storage_path('tmp'),
 
@@ -45,21 +43,21 @@ return [
      * Request Keys.
      */
     'request_keys' => [
-        'chunk_number' => 'resumableChunkNumber'
+        'chunk_number' => 'resumableChunkNumber',
     ],
 
 
-    /*
+    /**
     |--------------------------------------------------------------------------
     | Handlers
     |--------------------------------------------------------------------------
     |
     | Specify a list of handlers. Handlers must extend the UploadHandler
-    | (le0daniel\LaravelResumableJs\Contracts\UploadHandler)
+    | {@see le0daniel\LaravelResumableJs\Contracts\UploadHandler}
     |
     */
     'handlers' => [
-        //'basic' => \le0daniel\LaravelResumableJs\Handlers\BasicHandler::class,
+        //'basic' => YourHandler::class,
     ],
 
 

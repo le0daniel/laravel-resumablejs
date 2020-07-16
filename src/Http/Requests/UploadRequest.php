@@ -6,7 +6,7 @@ use Illuminate\Foundation\Http\FormRequest;
 
 final class UploadRequest extends FormRequest
 {
-    use InteractsWithChunkNumer;
+    use HasChunkNumber;
 
     public function rules()
     {

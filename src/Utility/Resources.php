@@ -32,40 +32,36 @@ final class Resources
     }
 
     /**
-     * @param string|string[] $from
-     * @param string $to
+     * Combine multiple files into one new file.
+     *
+     * @param string|string[] $sourcePaths
+     * @param string $destinationPath
      * @param string $fromMode
-     * @param string $toMode
+     * @param string $destinationOpenMode
      * @throws \Exception
      */
-    public static function combine($from, string $to, string $fromMode = 'r', string $toMode = 'w+'): void
+    public static function combine($sourcePaths, string $destinationPath, string $fromMode = 'r', string $destinationOpenMode = 'w+'): void
     {
-        if (!is_array($from)) $from = [$from];
+        $sourcePaths = is_array($sourcePaths) ? $sourcePaths : [$sourcePaths];
 
         try {
-            $toResource = self::open($to, $toMode);
+            $destinationResource = self::open($destinationPath, $destinationOpenMode);
 
-            foreach ($from as $filePath) {
-                $formResource = self::open($filePath, $fromMode);
+            foreach ($sourcePaths as $filePath) {
+                $sourceResource = self::open($filePath, $fromMode);
 
-                if (stream_copy_to_stream($formResource, $toResource) === false) {
-                    throw new \RuntimeException("Failed to copy from {$from}[{$fromMode}] to {$to}[{$toMode}]");
+                if (stream_copy_to_stream($sourceResource, $destinationResource) === false) {
+                    throw new \RuntimeException("Failed to copy from {$filePath}[{$fromMode}] to {$destinationPath}[{$destinationOpenMode}]");
                 }
-                self::close($formResource);
+
+                self::close($sourceResource);
             }
 
-            self::close($toResource);
+            self::close($destinationResource);
         } catch (\Exception $exception) {
-            self::close($formResource ?? null, $toResource ?? null);
+            self::close($sourceResource ?? null, $destinationResource ?? null);
             throw $exception;
         }
-    }
-
-    public static function auto(\Closure $closure, string $mode, string ...$paths)
-    {
-        $resources = array_map(fn(string $path) => self::open($path, $mode), $paths);
-        $closure(...$resources);
-        self::close(...$resources);
     }
 
 }

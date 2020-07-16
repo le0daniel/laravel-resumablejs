@@ -16,7 +16,7 @@ abstract class UploadHandler
 {
     /**
      * Return the middleware to load on the init call.
-     * By default, no middlewares are applied.
+     * By default, no middleware are applied.
      * @return array|null
      */
     abstract public function middleware(): ?array;
@@ -38,7 +38,7 @@ abstract class UploadHandler
 
     /**
      * Hook called as soon as the file has been combined successfully. This is a good place to
-     * do some further checks like size, mimetype or a virus scan.
+     * do some further checks like size, mime type or a virus scan.
      *
      * @param \SplFileInfo $file
      * @param FileUpload $fileUpload
@@ -60,7 +60,7 @@ abstract class UploadHandler
     /**
      * Process the uploaded file
      * During the handling you may throw {@see UploadProcessingException} using
-     * UploadProcessingException::with('user message', 'internal message') to show return messages
+     * UploadProcessingException::with('user message', 'internal message') to return messages
      * to the client.
      *
      * @param \SplFileInfo $file

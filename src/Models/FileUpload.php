@@ -31,7 +31,7 @@ class FileUpload extends Model
     protected $fillable = ['size', 'chunks', 'name', 'extension', 'type', 'payload'];
     protected $casts = [
         'payload' => 'array',
-        'is_complete',
+        'is_complete' => 'boolean',
     ];
 
     public function appendToPayload(string $key, $value): void
